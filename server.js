@@ -15,22 +15,26 @@ let db;
 
 // Connect once and reuse the connection
 async function connectToMongo() {
-  try {
-    await client.connect();
-    db = client.db(); // defaults to DB from URI
-    console.log('✅ Connected to MongoDB Atlas');
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
-    process.exit(1);
-  }
+    try {
+        await client.connect();
+        db = client.db('devunn'); // defaults to DB from URI
+        console.log('✅ Connected to MongoDB Atlas');
+    } catch (err) {
+        console.error('❌ MongoDB connection error:', err);
+        process.exit(1);
+    }
 }
 
 // Call the connection function
 connectToMongo();
 
-// Export app and a way to get collection
-function getCollection(name) {
-  return db.collection(name);
+function getDb() {
+    return db;
 }
 
-module.exports = { app, getCollection };
+// Export app and a way to get collection
+function getCollection(name) {
+    return db.collection(name);
+}
+
+module.exports = { app, getCollection, getDb };
