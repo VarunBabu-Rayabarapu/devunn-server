@@ -3,6 +3,7 @@ const { app } = require('./server');
 
 // Attach all routes here
 app.use('/api', require('./routes/components'));
+app.use('/api', require('./routes/fetchComponent'));
 
 // Start the server
 const PORT = process.env.PORT || 5000;

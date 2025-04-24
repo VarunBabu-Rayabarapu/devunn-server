@@ -1,36 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const { getCollection, getDb } = require('../server');
+const { getCollection } = require('../server');
+const generateComponentFromDescription = require('./AI');
+
 
 router.post('/submit/:password', async (req, res) => {
-    const password = req.params.password;
-    if (password !== process.env.MASTER_PASSWORD) {
-        return res.status(403).json({ status: 'error', message: 'Invalid password' });
+  const componentsCollection = getCollection('components');
+  const password = req.params.password;
+
+  if (password !== process.env.MASTER_PASSWORD) {
+    return res.status(403).json({ status: 'error', message: 'Invalid password' });
+  }
+
+  const { url, code, description } = req.body;
+
+  try {
+    let finalCode = code;
+
+    if (!code && description) {
+      finalCode = await generateComponentFromDescription(description);
     }
 
-    try {
-        const db = getDb();
-        const collectionName = 'components';
-
-        const existingCollections = await db.listCollections({ name: collectionName }).toArray();
-        if (existingCollections.length === 0) {
-            await db.createCollection(collectionName);
-            console.log(`✅ Collection '${collectionName}' created`);
-        }
-
-        const componentsCollection = getCollection(collectionName);
-        const result = await componentsCollection.insertOne(req.body);
-
-        res.json({
-            status: 'ok',
-            insertedId: result.insertedId,
-            uptime: process.uptime(),
-            message: 'successful',
-        });
-    } catch (err) {
-        console.error('❌ Error inserting into components:', err);
-        res.status(500).json({ status: 'error', message: 'Insert failed' });
+    if (!finalCode) {
+      return res.status(400).json({ status: 'error', message: 'No code or description provided' });
     }
+
+    const result = await componentsCollection.insertOne({
+      url,
+      code: finalCode,
+      createdAt: new Date(),
+    });
+
+    res.json({ status: 'ok', insertedId: result.insertedId });
+  } catch (err) {
+    console.error('❌ Error:', err);
+    res.status(500).json({ status: 'error', message: 'Insert failed' });
+  }
 });
 
 module.exports = router;
