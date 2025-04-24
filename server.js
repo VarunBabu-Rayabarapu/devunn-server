@@ -37,4 +37,4 @@ function getCollection(name) {
     return db.collection(name);
 }
 
-module.exports = { app, getCollection, getDb };
+module.exports = { app, getCollection, getDb, connectToMongo };
