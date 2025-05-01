@@ -7,6 +7,7 @@ app.use('/api', require('./routes/components'));
 app.use('/api', require('./routes/fetchComponent'));
 app.use('/api', require('./routes/fetchAllComponents'));
 app.use('/api', require('./routes/deleteComponent'));
+app.use('/api', require('./routes/reloadDynamicRoutes'));
 
 // Start everything inside an async IIFE
 (async () => {
